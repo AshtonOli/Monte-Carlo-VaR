@@ -1,13 +1,13 @@
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy import stats
 from statsmodels.graphics.gofplots import qqplot
 from statsmodels.tsa.stattools import acf
-import numpy as np
-
+import matplotlib.pyplot as plt
 
 def analyse_returns_characteristics(
     returns: pd.DataFrame, save_path: Optional[str] = None
@@ -119,7 +119,7 @@ def analyse_returns_characteristics(
             name="Log returns",
             mode="lines",
             line={"color": "rgba(0, 135, 255, 0.63)"},
-            showlegend=False,
+            
         ),
         row=1,
         col=1,
@@ -130,6 +130,7 @@ def analyse_returns_characteristics(
             y=c_returns["log_mean"],
             mode="lines",
             line={"color": "black", "dash": "dash"},
+            showlegend=False,
         ),
         row=1,
         col=1,
@@ -138,16 +139,35 @@ def analyse_returns_characteristics(
     # Returns histogram
     # - X
     # - -
-
+    x_range = np.linspace(returns_summary["min"], returns_summary["max"],100)
+    normal_dist = stats.norm.pdf(x_range,returns_summary["mean"],returns_summary["std"])
     fig.add_trace(
-        go.Histogram(x=returns.log_returns, name="Log return Frequency",marker_color = "rgba(0, 135, 255, 0.63)"), row=1, col=2
+        go.Histogram(
+            x=returns.log_returns,
+            name="Log return Frequency",
+            marker_color="rgba(0, 135, 255, 0.63)",
+            histnorm="probability density",
+        ),
+        row=1,
+        col=2,
+    )   
+    fig.add_trace(
+        go.Scatter(
+            x=x_range,
+            y=normal_dist,
+            mode='lines',
+            name='Normal Distribution',
+            line=dict(color='red', width=2),
+        ),
+        row=1,
+        col=2,
     )
-    
 
     # Q-Q Plot
     # - -
     # X -
     qqplot_data = qqplot(returns.log_returns, line="s").gca().lines
+    plt.close()
     fig.add_trace(
         go.Scatter(
             x=qqplot_data[0].get_xdata(),
