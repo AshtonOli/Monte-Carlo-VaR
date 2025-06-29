@@ -11,3 +11,9 @@ def parse_json(file_path : str) -> dict:
 def dt_date_range(start: dt.datetime, interval: int, periods: int):
     for i in range(periods):
         yield start +  dt.timedelta(seconds=i * interval)
+
+def dollar_format(x: int | float):
+    if x < 0:
+        return f"-${abs(x):,.2f}"
+    else:
+        return f"${x:,.2f}"
