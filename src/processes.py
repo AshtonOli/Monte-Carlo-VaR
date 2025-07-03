@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 from typing import Optional, Tuple
 from src.util import dt_date_range
-
+import asyncio
+from src.util import dollar_format
 
 class Processes:
     def __init__(self, returns: pd.DataFrame, seed: Optional[int] = None) -> None:
@@ -260,3 +261,34 @@ class Processes:
         )
         return df
     #############################
+
+    async def compare_processes(self, nPeriods: int, nSims: int) -> pd.DataFrame:
+        res = {}
+
+        async def run_gbm():
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(None, self.gbm_price_path, nPeriods, nSims)
+        async def run_jdp():
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(None,self.jdp, nPeriods, nSims)
+        async def run_ou():
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(None, self.ou, nPeriods, nSims)
+        
+        gbm_res, jdp_res, ou_res = await asyncio.gather(run_gbm(), run_jdp(), run_ou())
+        gbm_final = gbm_res.iloc[-1]
+        jdp_final = jdp_res.iloc[-1]
+        ou_res = ou_res.iloc[-1]
+
+        v_dollar_format = np.vectorize(dollar_format)
+
+        df = pd.DataFrame(
+            columns = ["GBM", "JDP", "OU"],
+            index = ["Max", "Min", "Mean", "Std", "Variance"],
+            data = v_dollar_format(np.array([
+                [max(gbm_final), min(gbm_final), np.mean(gbm_final), np.std(gbm_final), np.var(gbm_final)],
+                [max(jdp_final), min(jdp_final), np.mean(jdp_final), np.std(jdp_final), np.var(jdp_final)],
+                [max(ou_res), min(ou_res), np.mean(ou_res), np.std(ou_res), np.var(ou_res)],
+            ]).T)
+        )
+        return df
