@@ -15,6 +15,7 @@ def analyse_returns_characteristics(
     returns_summary = {
         "mean": returns.log_returns.mean(),
         "std": returns.log_returns.std(),
+        "Sharpe Ratio": returns.log_returns.mean() / returns.log_returns.std(),
         "skewness": stats.skew(returns.log_returns),
         "kurtosis": stats.kurtosis(returns.log_returns),
         "jb_pvalue": stats.jarque_bera(returns.log_returns)[1],
@@ -159,6 +160,17 @@ def analyse_returns_characteristics(
             name='Normal Distribution',
             line=dict(color='red', width=2),
         ),
+        row=1,
+        col=2,
+    )
+    fig.add_vline(
+        x = returns_summary["mean"],
+        line_dash = "dash",
+        line_color = "red",
+        label = {
+            "text" : "Mean",
+            "textposition" : "top right"
+        },
         row=1,
         col=2,
     )
