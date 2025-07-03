@@ -6,6 +6,7 @@ from typing import Optional
 from src.util import dollar_format
 from scipy import stats
 
+
 def component_var():
     pass
 
@@ -24,11 +25,18 @@ def produce_var_results(
     min_price_path = price_paths[f"sim_{1 + min_price_col}"]
 
     fig = make_subplots(
-        rows=1, cols=3, subplot_titles=("Sample of price paths", "VaR Curve")
+        rows=2,
+        cols=3,
+        subplot_titles=("Sample of price paths", "VaR Curve"),
+        specs=[
+            [{},{},{}],
+            [{"type" : "table","colspan" : 3}, None, None]
+        ],
     )
 
     # Simulated price paths
     # X - -
+    # - - -
     fig.add_trace(
         go.Scatter(x=price_paths.index, y=max_price_path, name="Max price path"),
         row=1,
@@ -55,6 +63,7 @@ def produce_var_results(
 
     # VaR Curve
     # - X -
+    # - - -
     fig.add_trace(
         go.Scatter(
             x=np.arange(1, 101),
@@ -88,19 +97,20 @@ def produce_var_results(
 
     # Final Prices distribution
     # - - X
+    # - - -
     final_prices = price_paths.iloc[-1]
-    x_range = np.linspace(final_prices.min(), final_prices.max(),100)
-    normal_dist = stats.norm.pdf(x_range,final_prices.mean(),final_prices.std())
+    x_range = np.linspace(final_prices.min(), final_prices.max(), 100)
+    normal_dist = stats.norm.pdf(x_range, final_prices.mean(), final_prices.std())
 
     fig.add_trace(
         go.Histogram(
-            x = final_prices,
+            x=final_prices,
             name="Final Prices",
             marker_color="rgba(0, 135, 255, 0.63)",
             histnorm="probability density",
         ),
-        row = 1,
-        col = 3,
+        row=1,
+        col=3,
     )
     fig.add_trace(
         go.Scatter(
@@ -122,6 +132,17 @@ def produce_var_results(
         row=1,
         col=3,
     )
+
+    fig.update_xaxes(
+        title_text="Final Prices",
+        tickformat="$,.2f",
+        row=1,
+        col=3,
+    )
+
+    # Table:
+    # - - -
+    # X - -
 
     if save_path:
         fig.write_html(save_path)
