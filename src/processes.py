@@ -118,7 +118,7 @@ class Processes:
             prices, index=time_index, columns=[f"sim_{i + 1}" for i in range(nSims)]
         )
         return df
-
+    #############################
     # Broken need to fix
     def _ou_fit(self) -> Tuple[float, float, float]:
         log_returns = self.returns.log_returns.to_numpy()
@@ -141,10 +141,12 @@ class Processes:
             b = (n * sum_xy - sum_x * sum_y) / denominator
             a = (sum_y - b * sum_x) / n
 
-            if b >= 1:
+            if b >= 1 or b<= 0:
                 theta = 0.001 / self.dt
+                
             else:
                 theta = -np.log(max(b, 1e-10)) / self.dt
+                # theta = min(theta, .001 / self.dt)
 
             if theta > 0:
                 mu = a / (1 - b)
@@ -161,6 +163,8 @@ class Processes:
                 sigma = np.sqrt(residual_var / theoretical_var)
             else:
                 sigma = np.std(residuals) / np.sqrt(self.dt)
+        
+        print(f"Fitted OU parameters: mu={mu}, sigma={sigma}, theta={theta}")
 
         return (mu, sigma, theta)
 
@@ -255,3 +259,4 @@ class Processes:
             columns=[f"sim_{i + 1}" for i in range(nSims)]
         )
         return df
+    #############################
