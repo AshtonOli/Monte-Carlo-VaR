@@ -143,6 +143,18 @@ def produce_var_results(
     # Table:
     # - - -
     # X - -
+    fig.add_trace(
+        go.Table(
+            cells = dict(
+                values = [
+                    ["Max price change", "Min price change", "Average price change", "P95 Loss"],
+                    [dollar_format(max(final_values)),dollar_format(min(final_values)), dollar_format(np.mean(final_values)),dollar_format(var_res[4])]
+                ]
+            )
+        ),
+        row = 2,
+        col = 1
+    )
 
     if save_path:
         fig.write_html(save_path)
