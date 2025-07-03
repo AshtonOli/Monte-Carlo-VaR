@@ -9,7 +9,7 @@ def parse_json(file_path : str) -> dict:
     return data
 
 def dt_date_range(start: dt.datetime, interval: int, periods: int):
-    for i in range(periods):
+    for i in range(1,periods+1):
         yield start +  dt.timedelta(seconds=i * interval)
 
 def dollar_format(x: int | float):
