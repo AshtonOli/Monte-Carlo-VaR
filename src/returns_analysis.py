@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -10,8 +10,8 @@ from statsmodels.tsa.stattools import acf
 import matplotlib.pyplot as plt
 
 def analyse_returns_characteristics(
-    returns: pd.DataFrame, save_path: Optional[str] = None
-) -> dict:
+    returns: pd.DataFrame, save_path: str | bool | None = None
+) -> Tuple[dict,go.Figure,go.Figure]:
     returns_summary = {
         "mean": returns.log_returns.mean(),
         "std": returns.log_returns.std(),
@@ -23,9 +23,17 @@ def analyse_returns_characteristics(
         "max": returns.log_returns.max(),
     }
 
-    print("BASIC STATS")
-    for key, value in returns_summary.items():
-        print(f"{key} : {value}")
+    summary_df = pd.DataFrame(
+        data = [[i[0],round(i[1],5)] for i in returns_summary.items()]
+    )
+
+    summary_table = go.Figure().add_trace(
+        go.Table(
+            cells = dict(
+                values = summary_df.transpose().values.tolist()
+            )
+        )
+    )
 
     fig = make_subplots(
         rows=2, cols=2, subplot_titles=("Log returns", "Frequency", "Q-Q Plot", "ACF")
@@ -218,9 +226,10 @@ def analyse_returns_characteristics(
         col=2,
     )
 
-    if save_path:
+    if isinstance(save_path,str):
         fig.write_html(save_path)
-    else:
+    elif save_path is None:
         fig.show()
 
-    return returns_summary
+
+    return (returns_summary,summary_table,fig)

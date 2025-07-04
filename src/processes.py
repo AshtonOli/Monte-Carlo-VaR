@@ -6,6 +6,9 @@ import asyncio
 from src.util import dollar_format
 
 class Processes:
+    complete_gbm = None
+    complete_jdp = None
+    complete_ou = None
     def __init__(self, returns: pd.DataFrame, seed: Optional[int] = None) -> None:
         self.returns = returns
         if seed is not None:
@@ -263,7 +266,7 @@ class Processes:
     #############################
 
     async def compare_processes(self, nPeriods: int, nSims: int) -> pd.DataFrame:
-        res = {}
+
 
         async def run_gbm():
             loop = asyncio.get_event_loop()
@@ -276,6 +279,11 @@ class Processes:
             return await loop.run_in_executor(None, self.ou, nPeriods, nSims)
         
         gbm_res, jdp_res, ou_res = await asyncio.gather(run_gbm(), run_jdp(), run_ou())
+
+        self.complete_gbm = gbm_res
+        self.complete_jdp = jdp_res
+        self.complete_ou = ou_res
+
         gbm_final = gbm_res.iloc[-1]
         jdp_final = jdp_res.iloc[-1]
         ou_res = ou_res.iloc[-1]
@@ -292,3 +300,16 @@ class Processes:
             ]).T)
         )
         return df
+
+    def str_select(self, process_selected : str) -> pd.DataFrame:
+        if process_selected.upper() == "GBM":
+            if self.complete_gbm is not None:
+                return self.complete_gbm
+        elif process_selected.upper() == "JDP":
+            if self.complete_jdp is not None:
+                return self.complete_jdp
+        elif process_selected.upper() == "OU":
+            if self.complete_ou is not None:
+                return self.complete_ou
+        else:
+            return pd.DataFrame()

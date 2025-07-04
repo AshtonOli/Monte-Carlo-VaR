@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-from typing import Optional
 from src.util import dollar_format
 from scipy import stats
 
@@ -12,7 +11,7 @@ def component_var():
 
 
 def produce_var_results(
-    price_paths: pd.DataFrame, returns: pd.DataFrame, save_path: Optional[str] = None
+    price_paths: pd.DataFrame, returns: pd.DataFrame, save_path: str | bool | None = None
 ):
     final_values = price_paths.iloc[-1].values
     losses = sorted(returns.close.iloc[-1] - final_values)
@@ -27,10 +26,10 @@ def produce_var_results(
     fig = make_subplots(
         rows=2,
         cols=3,
-        subplot_titles=("Sample of price paths", "VaR Curve"),
+        subplot_titles=("Sample of price paths", "VaR Curve", "Final price frequencies", "Basic Stats"),
         specs=[
-            [{},{},{}],
-            [{"type" : "table","colspan" : 3}, None, None]
+            [{"rowspan" : 2},{},{}],
+            [None, {"type" : "table","colspan" : 2}, None]
         ],
     )
 
@@ -142,7 +141,7 @@ def produce_var_results(
 
     # Table:
     # - - -
-    # X - -
+    # - X X
     fig.add_trace(
         go.Table(
             cells = dict(
@@ -153,10 +152,12 @@ def produce_var_results(
             )
         ),
         row = 2,
-        col = 1
+        col = 2
     )
 
-    if save_path:
+    if isinstance(save_path,str):
         fig.write_html(save_path)
-    else:
+    elif save_path is None:
         fig.show()
+
+    return fig
