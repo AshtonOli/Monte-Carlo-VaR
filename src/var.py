@@ -146,8 +146,8 @@ def produce_var_results(
         go.Table(
             cells = dict(
                 values = [
-                    ["Max price change", "Min price change", "Average price change", "P95 Loss"],
-                    [dollar_format(max(final_values)),dollar_format(min(final_values)), dollar_format(np.mean(final_values)),dollar_format(var_res[4])]
+                    ["# Periods","# Simulations","Max price", "Min price", "Average price", "P95 Loss"],
+                    [len(price_paths),len(final_values),dollar_format(max(final_values)),dollar_format(min(final_values)), dollar_format(np.mean(final_values)),dollar_format(var_res[4])]
                 ]
             )
         ),
@@ -157,7 +157,5 @@ def produce_var_results(
 
     if isinstance(save_path,str):
         fig.write_html(save_path)
-    elif save_path is None:
-        fig.show()
 
     return fig

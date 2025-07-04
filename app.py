@@ -7,11 +7,12 @@ from src.var import produce_var_results
 from src.processes import Processes
 from src.get_data import HistoricalData
 from src.util import parse_json, dollar_format
-
+from src.chart_visual import chart_visuals
 import plotly.graph_objects as go
 import pandas as pd
 
 import asyncio
+import datetime as dt
 
 #######################
 # LOAD DATA
@@ -27,9 +28,12 @@ df["closetime"] = pd.to_datetime(df.closetime)
 
 #######################
 # ANALYSIS
+simulate_to = df.closetime.iloc[-1] + dt.timedelta(hours = 5)
+given_interval = ( df.closetime.iloc[1] - df.closetime.iloc[0] ).total_seconds()
+periods = int((simulate_to - df.closetime.iloc[-1]).total_seconds() / given_interval)
 sample_stats, summary_table, sample_fig = analyse_returns_characteristics(df, False)
 process = Processes(df,1234)
-process_comparison_df = asyncio.run(process.compare_processes(10,10))
+process_comparison_df = asyncio.run(process.compare_processes(periods,1000))
 #######################
 
 #######################
@@ -37,11 +41,19 @@ process_comparison_df = asyncio.run(process.compare_processes(10,10))
 comparison_table = go.Figure(
     go.Table(
         cells = dict(
-            values = process_comparison_df.transpose().values.tolist()
+            values = process_comparison_df.reset_index(drop = False).transpose().values.tolist()
+        ),
+        header = dict(
+            values = process_comparison_df.columns
         )
     )
 )
+#######################
 
+#######################
+# GENERATE CANDLESTICK PLOT
+candlestick_graph = chart_visuals(df)
+#######################
 
 #######################
 # INSTANIATE APP
@@ -60,6 +72,22 @@ app.layout = html.Div(
             f"Last loaded price: {df.closetime.iloc[-1].strftime('%d-%b-%Y %H:%M:%S')} {dollar_format(df.close.iloc[-1])} SOL/USDC",
             style = {"color":'#2c3e50'}
         ),
+        # CANDLESTICK CHART
+        html.Div(
+            [
+                dcc.Graph(
+                    id = "candlestick-graph",
+                    figure = candlestick_graph
+                    )
+            ],
+            style = {
+                "padding" : "20px",
+                'backgroundColor': '#f8f9fa',
+                'border': '1px solid #dee2e6',
+                'margin': '5px'
+            }
+        ),
+        # SUMMARY TABLE
         html.Div(
             [
                 html.H2("Sample Summary"),
@@ -67,8 +95,15 @@ app.layout = html.Div(
                     id = "summary-table",
                     figure = summary_table
                 )
-            ]
+            ],
+            style = {
+                "padding" : "20px",
+                'backgroundColor': '#f8f9fa',
+                'border': '1px solid #dee2e6',
+                'margin': '5px'
+            }
         ),
+        # ANALYSIS CHARTS
         html.Div(
             [
                 html.H2("Sample Analysis"),
@@ -76,11 +111,19 @@ app.layout = html.Div(
                     id = "sample-analysis",
                     figure = sample_fig
                 )
-            ]
+            ],
+            style = {
+                "padding" : "20px",
+                'backgroundColor': '#f8f9fa',
+                'border': '1px solid #dee2e6',
+                'margin': '5px'
+            }
         ),
         html.H2("Price paths & Risk"),
+        # PROCESS ANALYSIS
         html.Div(
             [
+                # PROCESS SELECTION DROPDOWN
                 html.Div(
                     [
                         html.H3("Select a process"),
@@ -98,6 +141,7 @@ app.layout = html.Div(
                         'margin': '5px'
                     }
                 ),
+                # ANALYSIS CHARTS
                 html.Div(
                     [
                         html.H3("Analysis"),
@@ -111,6 +155,7 @@ app.layout = html.Div(
                         'margin': '5px'
                     }
                 ),
+                # PROCESS COMPARISON
                 html.Div(
                     [
                         html.H3("Process Comparison"),
