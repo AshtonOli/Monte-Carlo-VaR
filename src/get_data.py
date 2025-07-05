@@ -2,6 +2,7 @@ import pandas as pd
 from binance import Client
 import numpy as np
 class HistoricalData:
+    data = None
     intervals = {
         "1s":Client.KLINE_INTERVAL_1SECOND,
         "1m": Client.KLINE_INTERVAL_1MINUTE,
