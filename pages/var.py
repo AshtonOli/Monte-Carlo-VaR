@@ -1,10 +1,10 @@
 import dash
-from dash import html, dcc, Input, Output, callback
+from dash import html, dcc, Input, Output, callback, dash_table
 import plotly.graph_objects as go
 from data.data_manager import datamanager
 from src.var import produce_var_results
 from typing import Tuple
-
+import pandas as pd
 dash.register_page(__name__,path = '/price-paths-risk')
 
 nSims = 11
@@ -74,8 +74,35 @@ layout = html.Div(
                 html.Div(
                     [
                         html.H3("Process Comparison"),
-                        dcc.Graph(
+                        dash_table.DataTable(
                             id = "comparison-table",
+                            data = comparison_table.to_dict("records"),
+                            columns=[{"name": i, "id": i} for i in comparison_table.columns],
+                            style_table={
+                                'height': '100%',  # Fill parent height
+                                'overflowY': 'auto'  # Add scroll if needed
+                            },
+                            style_cell={
+                                'textAlign': 'left',
+                                'padding': '10px',
+                                'fontFamily': 'Arial',
+                                'fontSize': '12px'
+                            },
+                            style_header={
+                                'backgroundColor': '#2c3e50',
+                                'color': 'white',
+                                'fontWeight': 'bold'
+                            },
+                            style_data={
+                                'backgroundColor': '#f8f9fa',
+                                'color': 'black'
+                            },
+                            style_data_conditional=[
+                                {
+                                    'if': {'row_index': 'odd'},
+                                    'backgroundColor': '#ffffff'
+                                }
+                            ]
                         )
                     ],
                     style = {
@@ -101,7 +128,7 @@ layout = html.Div(
 @callback(
     [
         Output("price-path-analysis","figure"),
-        Output("comparison-table","figure")
+        Output("comparison-table", "data")
     ],
     [
         Input("process-select-dd","value"),
@@ -109,20 +136,10 @@ layout = html.Div(
         Input("n-simulations", "value")
     ]
 )
-def update_ppa(process_selected : str, new_nperiods:int, new_nsims: int) -> Tuple[go.Figure,go.Figure]:
+def update_ppa(process_selected : str, new_nperiods:int, new_nsims: int) -> Tuple[go.Figure, dict]:
     if new_nperiods > 0 or new_nsims > 0:
             process, comparison_table = datamanager.grab_price_path(True,new_nperiods,new_nsims)
     ppa = process.str_select(process_selected)
     fig = produce_var_results(ppa,returns,False)
 
-    comparison_table = go.Figure(
-        go.Table(
-            cells = dict(
-                values = comparison_table.reset_index(drop = False).transpose().values.tolist()
-            ),
-            header = dict(
-                values = [""] + list(comparison_table.columns)
-            )
-        )
-    )
-    return (fig, comparison_table)
+    return fig, comparison_table.to_dict("records")

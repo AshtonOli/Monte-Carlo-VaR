@@ -289,16 +289,21 @@ class Processes:
         ou_res = ou_res.iloc[-1]
 
         v_dollar_format = np.vectorize(dollar_format)
+        data = [
+            ["Max", "Min", "Mean", "Std", "Variance"],
+
+        ]
 
         df = pd.DataFrame(
             columns = ["GBM", "JDP", "OU"],
-            index = ["Max", "Min", "Mean", "Std", "Variance"],
+            index = np.array(["Max", "Min", "Mean", "Std", "Variance"]),
             data = v_dollar_format(np.array([
                 [max(gbm_final), min(gbm_final), np.mean(gbm_final), np.std(gbm_final), np.var(gbm_final)],
                 [max(jdp_final), min(jdp_final), np.mean(jdp_final), np.std(jdp_final), np.var(jdp_final)],
                 [max(ou_res), min(ou_res), np.mean(ou_res), np.std(ou_res), np.var(ou_res)],
             ]).T)
-        )
+        ).reset_index(drop = False).rename(columns={"index" : "Stats"})
+        
         return df
 
     def str_select(self, process_selected : str) -> pd.DataFrame:
