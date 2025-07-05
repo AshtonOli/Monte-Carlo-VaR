@@ -20,12 +20,7 @@ layout = html.Div(
                     figure = summary_table
                 )
             ],
-            style = {
-                "padding" : "20px",
-                'backgroundColor': '#f8f9fa',
-                'border': '1px solid #dee2e6',
-                'margin': '5px'
-            }
+            className = "graph-module"
         ),
         # ANALYSIS CHARTS
         html.Div(
@@ -36,12 +31,7 @@ layout = html.Div(
                     figure = sample_fig
                 )
             ],
-            style = {
-                "padding" : "20px",
-                'backgroundColor': '#f8f9fa',
-                'border': '1px solid #dee2e6',
-                'margin': '5px'
-            }
+            className = "graph-module"
         ),
     ]
 )

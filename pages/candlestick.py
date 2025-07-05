@@ -16,5 +16,6 @@ layout = html.Div(
                 dcc.Graph(id = "candle-stick", figure=candle_stick)
             ]
         )
-    ]
+    ],
+    className = "graph-module"
 )
