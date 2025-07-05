@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 
 import numpy as np
 import pandas as pd
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 def analyse_returns_characteristics(
     returns: pd.DataFrame, save_path: str | bool | None = None
-) -> Tuple[dict,go.Figure,go.Figure]:
+) -> Tuple[Dict[str,float],go.Figure,go.Figure]:
     returns_summary = {
         "mean": returns.log_returns.mean(),
         "std": returns.log_returns.std(),
@@ -24,7 +24,8 @@ def analyse_returns_characteristics(
     }
 
     summary_df = pd.DataFrame(
-        data = [[i[0],round(i[1],5)] for i in returns_summary.items()]
+        data = [[i[0],round(i[1],5)] for i in returns_summary.items()],
+        columns = ["stats", "value"]
     )
 
     summary_table = go.Figure().add_trace(

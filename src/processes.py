@@ -168,7 +168,6 @@ class Processes:
             else:
                 sigma = np.std(residuals) / np.sqrt(self.dt)
         
-        print(f"Fitted OU parameters: mu={mu}, sigma={sigma}, theta={theta}")
 
         return (mu, sigma, theta)
 
