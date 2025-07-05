@@ -48,70 +48,69 @@ layout = html.Div(
                             placeholder=10
                         )
                     ],
-                    style = {
-                        "flex" : '1',
-                        "padding" : "20px",
-                        'backgroundColor': '#f8f9fa',
-                        'border': '1px solid #dee2e6',
-                        'margin': '5px'
-                    }
+                    className = "graph-module",
+                    style = {"flex" : '1'}
                 ),
                 # ANALYSIS CHARTS
                 html.Div(
                     [
                         html.H3("Analysis"),
-                        dcc.Graph(id = "price-path-analysis")
+                        dcc.Loading(
+                            id = "analysis-loading",
+                            children=[
+                                dcc.Graph(id = "price-path-analysis")
+                            ],
+                            type = "circle" 
+                        )
+                        
                     ],
-                    style = {
-                        "flex" : '3',
-                        "padding" : "20px",
-                        'backgroundColor': '#f8f9fa',
-                        'border': '1px solid #dee2e6',
-                        'margin': '5px'
-                    }
+                    style = { "flex" : '3'},
+                    className = "graph-module"
                 ),
                 # PROCESS COMPARISON
                 html.Div(
                     [
                         html.H3("Process Comparison"),
-                        dash_table.DataTable(
-                            id = "comparison-table",
-                            data = comparison_table.to_dict("records"),
-                            columns=[{"name": i, "id": i} for i in comparison_table.columns],
-                            style_table={
-                                'height': '100%',  # Fill parent height
-                                'overflowY': 'auto'  # Add scroll if needed
-                            },
-                            style_cell={
-                                'textAlign': 'left',
-                                'padding': '10px',
-                                'fontFamily': 'Arial',
-                                'fontSize': '12px'
-                            },
-                            style_header={
-                                'backgroundColor': '#2c3e50',
-                                'color': 'white',
-                                'fontWeight': 'bold'
-                            },
-                            style_data={
-                                'backgroundColor': '#f8f9fa',
-                                'color': 'black'
-                            },
-                            style_data_conditional=[
-                                {
-                                    'if': {'row_index': 'odd'},
-                                    'backgroundColor': '#ffffff'
-                                }
-                            ]
+                        dcc.Loading(
+                            id = "compare-loading",
+                            children = [
+                                dash_table.DataTable(
+                                    id = "comparison-table",
+                                    data = comparison_table.to_dict("records"),
+                                    columns=[{"name": i, "id": i} for i in comparison_table.columns],
+                                    style_table={
+                                        'height': '100%',  # Fill parent height
+                                        'overflowY': 'auto'  # Add scroll if needed
+                                    },
+                                    style_cell={
+                                        'textAlign': 'left',
+                                        'padding': '10px',
+                                        'fontFamily': 'Arial',
+                                        'fontSize': '12px'
+                                    },
+                                    style_header={
+                                        'backgroundColor': '#2c3e50',
+                                        'color': 'white',
+                                        'fontWeight': 'bold'
+                                    },
+                                    style_data={
+                                        'backgroundColor': '#f8f9fa',
+                                        'color': 'black'
+                                    },
+                                    style_data_conditional=[
+                                        {
+                                            'if': {'row_index': 'odd'},
+                                            'backgroundColor': '#ffffff'
+                                        }
+                                    ]
+                                )
+                            ],
+                            type = "circle"
                         )
+                        
                     ],
-                    style = {
-                        "flex" : '1',
-                        "padding" : "20px",
-                        'backgroundColor': '#f8f9fa',
-                        'border': '1px solid #dee2e6',
-                        'margin': '5px'
-                    }
+                    style = {"flex" : '1'},
+                    className="graph-module"
                 )
             ],
             style={
