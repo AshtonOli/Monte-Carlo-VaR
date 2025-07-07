@@ -11,11 +11,12 @@ class DataManager:
     _data_cache = {}
     _last_loaded = {}
 
-    def __new__(cls, api_key: str, api_secret: str):
+    def __new__(cls, api_key: str, api_secret: str, saved_data: bool = False):
         if cls._instance is None:
             cls.__api_key = api_key
             cls.__api_secret = api_secret
             cls._instance = super(DataManager, cls).__new__(cls)
+            cls._saved_data = saved_data
         return cls._instance
 
     def grab_ohlc_data(self, force_reload=False) -> pd.DataFrame:
@@ -35,8 +36,14 @@ class DataManager:
 
     def load_ohlc_data(self) -> pd.DataFrame:
         cache_key = "ohlc_data"
-        binance = HistoricalData(self.__api_key, self.__api_secret)
-        df = binance.getKline("SOLUSDC", "12h").dropna()
+        if self._saved_data:
+            df = pd.read_csv("test_data.csv").dropna()
+            df["opentime"] = pd.to_datetime(df.opentime)
+            df["closetime"] = pd.to_datetime(df.closetime)
+        else:
+            binance = HistoricalData(self.__api_key, self.__api_secret)
+            df = binance.getKline("SOLUSDC", "12h").dropna()
+        
         self._data_cache[cache_key] = df
         self._last_loaded[cache_key] = dt.datetime.now()
         return df
@@ -69,4 +76,4 @@ class DataManager:
 
 
 config = parse_json("config.json")
-datamanager = DataManager(api_key=config["binance"]["API_KEY"], api_secret=config["binance"]["API_SECRET"])
+datamanager = DataManager(api_key=config["binance"]["API_KEY"], api_secret=config["binance"]["API_SECRET"], saved_data = True)
